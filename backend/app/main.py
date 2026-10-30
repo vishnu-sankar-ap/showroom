@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import Base, engine, SessionLocal
 from .security import hash_password
-from .routers import auth, enquiries, services
+from .routers import auth, enquiries, services, insurance
 
 Base.metadata.create_all(bind=engine)
 
@@ -20,6 +20,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(enquiries.router)
 app.include_router(services.router)
+app.include_router(insurance.router)
 
 
 @app.on_event("startup")
@@ -28,6 +29,7 @@ def create_default_admin():
     try:
         if not db.query(models.User).filter_by(role="admin").first():
             db.add(models.User(
+                customer_code="ADMIN",
                 name="Showroom Admin",
                 email=os.getenv("ADMIN_EMAIL", "admin@showroom.com"),
                 hashed_password=hash_password(os.getenv("ADMIN_PASSWORD", "admin123")),

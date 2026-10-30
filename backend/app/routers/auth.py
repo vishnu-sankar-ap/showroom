@@ -1,8 +1,9 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..database import get_db
-from ..deps import get_current_user
+from ..deps import get_current_user, require_admin
 from ..security import hash_password, verify_password, create_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -17,6 +18,8 @@ def register(data: schemas.RegisterIn, db: Session = Depends(get_db)):
         address=data.address, hashed_password=hash_password(data.password),
     )
     db.add(user)
+    db.flush()  # gets the new id without finishing the transaction
+    user.customer_code = f"SR-{1000 + user.id}"
     db.commit()
     db.refresh(user)
     return user
@@ -33,3 +36,8 @@ def login(data: schemas.LoginIn, db: Session = Depends(get_db)):
 @router.get("/me", response_model=schemas.UserOut)
 def me(user: models.User = Depends(get_current_user)):
     return user
+
+
+@router.get("/customers", response_model=List[schemas.UserOut])
+def customers(db: Session = Depends(get_db), _=Depends(require_admin)):
+    return db.query(models.User).filter_by(role="customer").order_by(models.User.id).all()

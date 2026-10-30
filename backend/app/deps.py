@@ -25,3 +25,13 @@ def require_admin(user: models.User = Depends(get_current_user)):
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
+
+def find_customer(db: Session, code: str) -> models.User:
+    user = (
+        db.query(models.User)
+        .filter(models.User.customer_code == code.strip().upper(), models.User.role == "customer")
+        .first()
+    )
+    if not user:
+        raise HTTPException(status_code=404, detail=f"No customer found with code {code}")
+    return user

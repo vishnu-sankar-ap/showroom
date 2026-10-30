@@ -25,6 +25,7 @@ class Token(BaseModel):
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    customer_code: Optional[str]
     name: str
     email: EmailStr
     phone: Optional[str]
@@ -46,7 +47,8 @@ class EnquiryUpdate(BaseModel):
 class EnquiryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    user_id: int
+    customer_code: Optional[str]
+    customer_name: Optional[str]
     vehicle_name: str
     message: Optional[str]
     status: str
@@ -56,16 +58,46 @@ class EnquiryOut(BaseModel):
 
 
 class ServiceCreate(BaseModel):
-    user_id: int
+    customer_code: str
     vehicle_model: str
     reg_number: Optional[str] = None
     service_date: Optional[date] = None
     description: Optional[str] = None
     cost: Optional[float] = None
-    insurance_provider: Optional[str] = None
-    insurance_expiry: Optional[date] = None
 
 
-class ServiceOut(ServiceCreate):
+class ServiceOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    customer_code: Optional[str]
+    customer_name: Optional[str]
+    vehicle_model: str
+    reg_number: Optional[str]
+    service_date: Optional[date]
+    description: Optional[str]
+    cost: Optional[float]
+
+
+class InsuranceCreate(BaseModel):
+    customer_code: str
+    vehicle_model: str
+    reg_number: Optional[str] = None
+    provider: str
+    policy_number: Optional[str] = None
+    start_date: Optional[date] = None
+    expiry_date: date
+    premium: Optional[float] = None
+
+
+class InsuranceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    customer_code: Optional[str]
+    customer_name: Optional[str]
+    vehicle_model: str
+    reg_number: Optional[str]
+    provider: str
+    policy_number: Optional[str]
+    start_date: Optional[date]
+    expiry_date: date
+    premium: Optional[float]
